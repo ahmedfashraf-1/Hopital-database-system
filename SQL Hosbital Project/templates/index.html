@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Fix 1: Add favicon to prevent 404 error -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #1a75bc 0%, #0a4299 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .logo {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .logo span {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+        
+        .menu-item {
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            border-left: 4px solid transparent;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #4cd7c6;
+        }
+        
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #4cd7c6;
+        }
+        
+        .menu-item i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .header h2 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-box input {
+            border: none;
+            outline: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            width: 250px;
+        }
+        
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h3 {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+        
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        /* Form Styles */
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+        
+        .form-group {
+            flex: 1 0 calc(33.333% - 20px);
+            margin: 0 10px 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #4cd7c6;
+            box-shadow: 0 0 0 2px rgba(76, 215, 198, 0.2);
+        }
+        
+        /* Button Styles */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #4cd7c6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3bc1b0;
+        }
+        
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #ee5a5a;
+        }
+        
+        .btn-success {
+            background: #1dd1a1;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #10a882;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 13px;
+        }
+        
+        /* Status Indicators */
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #e8f7f5;
+            color: #1dd1a1;
+        }
+        
+        .status-inactive {
+            background: #ffebee;
+            color: #ff6b6b;
+        }
+        
+        .status-pending {
+            background: #fff8e1;
+            color: #ffc107;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 800px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .form-group {
+                flex: 1 0 calc(50% - 20px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .form-group {
+                flex: 1 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>Hospital Management</h1>
+                <span>Comprehensive Database System</span>
+            </div>
+            
+            <div class="menu-item active" data-table="Patient">
+                <i class="fas fa-user-injured"></i>
+                <span>Patient Management</span>
+            </div>
+            
+            <div class="menu-item" data-table="Appointment">
+                <i class="fas fa-calendar-check"></i>
+                <span>Appointments</span>
+            </div>
+            
+            <div class="menu-item" data-table="Encounter">
+                <i class="fas fa-stethoscope"></i>
+                <span>Encounters</span>
+            </div>
+            
+            <div class="menu-item" data-table="Provider">
+                <i class="fas fa-user-md"></i>
+                <span>Providers</span>
+            </div>
+            
+            <div class="menu-item" data-table="Prescription">
+                <i class="fas fa-pills"></i>
+                <span>Pharmacy</span>
+            </div>
+            
+            <div class="menu-item" data-table="Diagnosis">
+                <i class="fas fa-file-medical"></i>
+                <span>Clinical Docs</span>
+            </div>
+            
+            <div class="menu-item" data-table="Invoice">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Billing</span>
+            </div>
+            
+            <div class="menu-item" data-table="InventoryItem">
+                <i class="fas fa-warehouse"></i>
+                <span>Inventory</span>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h2 id="current-table">Patient Management</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search...">
+                </div>
+            </div>
+            
+            <!-- Stats Overview -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>System Overview</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group" style="text-align: center; background: #e8f7f5; padding: 15px; border-radius: 8px;">
+                            <h3 id="patient-count">0</h3>
+                            <p>Patients</p>
+                        </div>
+                        <div class="form-group" style="text-align: center; background: #fff8e1; padding: 15px; border-radius: 8px;">
+                            <h3 id="appointment-count">0</h3>
+                            <p>Appointments Today</p>
+                        </div>
+                        <div class="form-group" style="text-align: center; background: #e8f7f5; padding: 15px; border-radius: 8px;">
+                            <h3 id="order-count">0</h3>
+                            <p>Pending Orders</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 id="table-title">Patient Data</h3>
+                    <button class="btn btn-primary" id="add-record-btn">
+                        <i class="fas fa-plus"></i> Add New Record
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="data-table">
+                            <thead>
+                                <tr id="table-headers">
+                                    <th>Loading...</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <tr>
+                                    <td colspan="10" style="text-align: center;">Loading data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Add/Edit -->
+    <div id="form-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title">Add New Record</h2>
+            <div id="form-container">
+                <!-- Form will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTable = 'Patient';
+        let tableData = [];
+        let tableColumns = [];
+        let primaryKey = null; // Store primary key dynamically
+        
+        // DOM elements
+        const dataTable = document.getElementById('data-table');
+        const tableBody = document.getElementById('table-body');
+        const tableHeaders = document.getElementById('table-headers');
+        const searchInput = document.getElementById('search-input');
+        const addRecordBtn = document.getElementById('add-record-btn');
+        const modal = document.getElementById('form-modal');
+        const closeModal = document.querySelector('.close');
+        const formContainer = document.getElementById('form-container');
+        const modalTitle = document.getElementById('modal-title');
+        const currentTableTitle = document.getElementById('current-table');
+        const tableTitle = document.getElementById('table-title');
+        
+        // Event listeners
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('active'));
+                this.classList.add('active');
+                currentTable = this.getAttribute('data-table');
+                currentTableTitle.textContent = this.querySelector('span').textContent;
+                tableTitle.textContent = `${currentTable} Data`;
+                loadTableData(currentTable);
+            });
+        });
+        
+        searchInput.addEventListener('input', filterTable);
+        addRecordBtn.addEventListener('click', showAddForm);
+        closeModal.addEventListener('click', () => modal.style.display = 'none');
+        
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTableData(currentTable);
+            loadStats();
+        });
+        
+        // Functions
+        async function loadTableData(tableName) {
+            try {
+                tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Loading data...</td></tr>';
+                const response = await fetch(`/api/table/${tableName}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                tableData = result.data || [];
+                tableColumns = result.columns || [];
+                
+                // Get table structure to identify primary key
+                const structureResponse = await fetch(`/api/structure/${tableName}`);
+                const structureResult = await structureResponse.json();
+                
+                if (structureResult.error) {
+                    throw new Error(structureResult.error);
+                }
+                
+                primaryKey = structureResult.structure.find(col => col.Key === 'PRI')?.Field || tableColumns[0];
+                
+                // Update table headers
+                tableHeaders.innerHTML = '';
+                tableColumns.forEach(column => {
+                    const th = document.createElement('th');
+                    th.textContent = column;
+                    tableHeaders.appendChild(th);
+                });
+                
+                // Add action column header
+                const actionTh = document.createElement('th');
+                actionTh.textContent = 'Actions';
+                tableHeaders.appendChild(actionTh);
+                
+                // Update table body
+                renderTable();
+            } catch (error) {
+                console.error('Error loading table data:', error);
+                tableBody.innerHTML = `<tr><td colspan="${tableColumns.length + 1}" style="text-align: center;">Error loading data: ${error.message}</td></tr>`;
+            }
+        }
+        
+        function renderTable() {
+            tableBody.innerHTML = '';
+            
+            if (tableData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="${tableColumns.length + 1}" style="text-align: center;">No data available</td></tr>`;
+                return;
+            }
+            
+            tableData.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                tableColumns.forEach(column => {
+                    const td = document.createElement('td');
+                    td.textContent = row[column] ?? 'NULL';
+                    tr.appendChild(td);
+                });
+                
+                // Add action buttons
+                const actionTd = document.createElement('td');
+                actionTd.className = 'action-buttons';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-primary btn-sm';
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.addEventListener('click', () => showEditForm(row));
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-danger btn-sm';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.addEventListener('click', () => deleteRecord(row));
+                
+                actionTd.appendChild(editBtn);
+                actionTd.appendChild(deleteBtn);
+                tr.appendChild(actionTd);
+                
+                tableBody.appendChild(tr);
+            });
+        }
+        
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            if (!searchTerm) {
+                renderTable();
+                return;
+            }
+            
+            const filteredData = tableData.filter(row => 
+                Object.values(row).some(value => 
+                    value?.toString().toLowerCase().includes(searchTerm)
+                )
+            );
+            
+            tableBody.innerHTML = '';
+            
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="${tableColumns.length + 1}" style="text-align: center;">No matching records found</td></tr>`;
+                return;
+            }
+            
+            filteredData.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                tableColumns.forEach(column => {
+                    const td = document.createElement('td');
+                    td.textContent = row[column] ?? 'NULL';
+                    tr.appendChild(td);
+                });
+                
+                // Add action buttons
+                const actionTd = document.createElement('td');
+                actionTd.className = 'action-buttons';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-primary btn-sm';
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.addEventListener('click', () => showEditForm(row));
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-danger btn-sm';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.addEventListener('click', () => deleteRecord(row));
+                
+                actionTd.appendChild(editBtn);
+                actionTd.appendChild(deleteBtn);
+                tr.appendChild(actionTd);
+                
+                tableBody.appendChild(tr);
+            });
+        }
+        
+        async function showAddForm() {
+            try {
+                const structureResponse = await fetch(`/api/structure/${currentTable}`);
+                const structureResult = await structureResponse.json();
+                
+                if (structureResult.error) {
+                    throw new Error(structureResult.error);
+                }
+                
+                modalTitle.textContent = `Add New ${currentTable} Record`;
+                formContainer.innerHTML = '';
+                
+                const form = document.createElement('form');
+                form.id = 'data-form';
+                
+                structureResult.structure.forEach(column => {
+                    const formGroup = document.createElement('div');
+                    formGroup.className = 'form-group';
+                    
+                    const label = document.createElement('label');
+                    label.textContent = column.Field;
+                    label.htmlFor = column.Field;
+                    
+                    let input;
+                    const colType = column.Type.toLowerCase();
+                    
+                    if (colType.includes('int')) {
+                        input = document.createElement('input');
+                        input.type = 'number';
+                        input.step = '1';
+                    } else if (colType.includes('decimal') || colType.includes('float') || colType.includes('double')) {
+                        input = document.createElement('input');
+                        input.type = 'number';
+                        input.step = '0.01';
+                    } else if (colType.includes('date') || colType.includes('time')) {
+                        input = document.createElement('input');
+                        input.type = colType.includes('date') && colType.includes('time') ? 'datetime-local' : colType.includes('date') ? 'date' : 'time';
+                    } else if (colType.includes('text') || colType.includes('varchar')) {
+                        input = document.createElement('textarea');
+                    } else if (colType.includes('enum')) {
+                        input = document.createElement('select');
+                        const options = colType.match(/\((.*?)\)/)?.[1].split(',').map(opt => opt.replace(/'/g, '').trim());
+                        options?.forEach(opt => {
+                            const option = document.createElement('option');
+                            option.value = opt;
+                            option.textContent = opt;
+                            input.appendChild(option);
+                        });
+                    } else {
+                        input = document.createElement('input');
+                        input.type = 'text';
+                    }
+                    
+                    input.id = column.Field;
+                    input.name = column.Field;
+                    input.placeholder = `Enter ${column.Field}`;
+                    
+                    if (column.Key === 'PRI' || column.Null === 'NO') {
+                        input.required = true;
+                    }
+                    
+                    formGroup.appendChild(label);
+                    formGroup.appendChild(input);
+                    form.appendChild(formGroup);
+                });
+                
+                const submitButton = document.createElement('button');
+                submitButton.type = 'button';
+                submitButton.className = 'btn btn-success';
+                submitButton.textContent = 'Submit';
+                submitButton.addEventListener('click', () => submitForm());
+                
+                form.appendChild(submitButton);
+                formContainer.appendChild(form);
+                
+                modal.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading table structure:', error);
+                alert(`Error loading form: ${error.message}`);
+            }
+        }
+        
+        async function showEditForm(row) {
+            try {
+                const structureResponse = await fetch(`/api/structure/${currentTable}`);
+                const structureResult = await structureResponse.json();
+                
+                if (structureResult.error) {
+                    throw new Error(structureResult.error);
+                }
+                
+                modalTitle.textContent = `Edit ${currentTable} Record`;
+                formContainer.innerHTML = '';
+                
+                const form = document.createElement('form');
+                form.id = 'data-form';
+                
+                primaryKey = structureResult.structure.find(col => col.Key === 'PRI')?.Field || tableColumns[0];
+                const primaryKeyValue = row[primaryKey];
+                
+                structureResult.structure.forEach(column => {
+                    const formGroup = document.createElement('div');
+                    formGroup.className = 'form-group';
+                    
+                    const label = document.createElement('label');
+                    label.textContent = column.Field;
+                    label.htmlFor = column.Field;
+                    
+                    let input;
+                    const colType = column.Type.toLowerCase();
+                    
+                    if (colType.includes('int')) {
+                        input = document.createElement('input');
+                        input.type = 'number';
+                        input.step = '1';
+                    } else if (colType.includes('decimal') || colType.includes('float') || colType.includes('double')) {
+                        input = document.createElement('input');
+                        input.type = 'number';
+                        input.step = '0.01';
+                    } else if (colType.includes('date') || colType.includes('time')) {
+                        input = document.createElement('input');
+                        input.type = colType.includes('date') && colType.includes('time') ? 'datetime-local' : colType.includes('date') ? 'date' : 'time';
+                    } else if (colType.includes('text') || colType.includes('varchar')) {
+                        input = document.createElement('textarea');
+                    } else if (colType.includes('enum')) {
+                        input = document.createElement('select');
+                        const options = colType.match(/\((.*?)\)/)?.[1].split(',').map(opt => opt.replace(/'/g, '').trim());
+                        options?.forEach(opt => {
+                            const option = document.createElement('option');
+                            option.value = opt;
+                            option.textContent = opt;
+                            if (row[column.Field] === opt) option.selected = true;
+                            input.appendChild(option);
+                        });
+                    } else {
+                        input = document.createElement('input');
+                        input.type = 'text';
+                    }
+                    
+                    input.id = column.Field;
+                    input.name = column.Field;
+                    input.value = row[column.Field] ?? '';
+                    input.placeholder = `Enter ${column.Field}`;
+                    
+                    if (column.Key === 'PRI') {
+                        input.readOnly = true;
+                        input.style.backgroundColor = '#f5f5f5';
+                    }
+                    
+                    if (column.Null === 'NO' && column.Key !== 'PRI') {
+                        input.required = true;
+                    }
+                    
+                    formGroup.appendChild(label);
+                    formGroup.appendChild(input);
+                    form.appendChild(formGroup);
+                });
+                
+                const submitButton = document.createElement('button');
+                submitButton.type = 'button';
+                submitButton.className = 'btn btn-success';
+                submitButton.textContent = 'Update';
+                // Fix 2: Ensure correct primaryKeyValue is passed
+                submitButton.addEventListener('click', () => submitForm(primaryKeyValue));
+                
+                form.appendChild(submitButton);
+                formContainer.appendChild(form);
+                
+                modal.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading table structure:', error);
+                alert(`Error loading form: ${error.message}`);
+            }
+        }
+        
+        async function submitForm(id = null) {
+            const form = document.getElementById('data-form');
+            const formData = new FormData(form);
+            const data = {};
+            
+            try {
+                const structureResponse = await fetch(`/api/structure/${currentTable}`);
+                const structureResult = await structureResponse.json();
+                
+                if (structureResult.error) {
+                    throw new Error(structureResult.error);
+                }
+                
+                // Validate id to prevent [object PointerEvent]
+                if (id && typeof id !== 'string' && typeof id !== 'number') {
+                    throw new Error('Invalid ID provided for update operation');
+                }
+                
+                for (const [key, value] of formData.entries()) {
+                    if (value.trim() !== '') {
+                        const column = structureResult.structure.find(col => col.Field === key);
+                        if (column) {
+                            const colType = column.Type.toLowerCase();
+                            
+                            if (colType.includes('int')) {
+                                const parsed = parseInt(value);
+                                data[key] = isNaN(parsed) ? null : parsed;
+                            } else if (colType.includes('decimal') || colType.includes('float') || colType.includes('double')) {
+                                const parsed = parseFloat(value);
+                                data[key] = isNaN(parsed) ? null : parsed;
+                            } else {
+                                data[key] = value;
+                            }
+                        } else {
+                            data[key] = value;
+                        }
+                    } else if (column?.Null === 'YES') {
+                        data[key] = null;
+                    }
+                }
+                
+                const requiredColumns = structureResult.structure.filter(col => 
+                    (col.Key === 'PRI' && id === null) || (col.Null === 'NO' && col.Key !== 'PRI')
+                );
+                
+                for (const column of requiredColumns) {
+                    if (!(column.Field in data) || data[column.Field] === null || data[column.Field] === '') {
+                        alert(`Field ${column.Field} is required!`);
+                        return;
+                    }
+                }
+                
+                let response;
+                if (id) {
+                    response = await fetch(`/api/update/${currentTable}/${encodeURIComponent(id)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    response = await fetch(`/api/insert/${currentTable}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                alert(result.message);
+                modal.style.display = 'none';
+                loadTableData(currentTable);
+                loadStats();
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert(`Error submitting form: ${error.message}`);
+            }
+        }
+        
+        async function deleteRecord(row) {
+            if (!primaryKey) {
+                alert('Primary key not defined for this table.');
+                return;
+            }
+            
+            const primaryKeyValue = row[primaryKey];
+            
+            if (!confirm(`Are you sure you want to delete this record? (${primaryKey}: ${primaryKeyValue})`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/delete/${currentTable}/${encodeURIComponent(primaryKeyValue)}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                alert(result.message);
+                loadTableData(currentTable);
+                loadStats();
+            } catch (error) {
+                console.error('Error deleting record:', error);
+                alert(`Error deleting record: ${error.message}`);
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                // Load patient count
+                const patientResponse = await fetch('/api/table/Patient');
+                const patientData = await patientResponse.json();
+                document.getElementById('patient-count').textContent = patientData.data?.length || 0;
+                
+                // Load appointment count for today
+                const appointmentResponse = await fetch('/api/table/Appointment');
+                const appointmentData = await appointmentResponse.json();
+                if (appointmentData.data) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const todayAppointments = appointmentData.data.filter(apt => 
+                        apt.start_time?.includes(today)
+                    );
+                    document.getElementById('appointment-count').textContent = todayAppointments.length;
+                } else {
+                    document.getElementById('appointment-count').textContent = 0;
+                }
+                
+                // Load order count with pending status
+                const orderResponse = await fetch('/api/table/Order');
+                const orderData = await orderResponse.json();
+                if (orderData.data) {
+                    const pendingOrders = orderData.data.filter(order => 
+                        order.status?.toLowerCase() === 'ordered'
+                    );
+                    document.getElementById('order-count').textContent = pendingOrders.length;
+                } else {
+                    document.getElementById('order-count').textContent = 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('patient-count').textContent = 'Error';
+                document.getElementById('appointment-count').textContent = 'Error';
+                document.getElementById('order-count').textContent = 'Error';
+            }
+        }
+    </script>
+</body>
+</html>
